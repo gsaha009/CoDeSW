@@ -1,0 +1,48 @@
+import FWCore.ParameterSet.Config as cms
+import FWCore.ParameterSet.Config as cms
+
+process = cms.Process("OnlineAnalysis")
+
+process.load('Configuration.StandardSequences.Services_cff')
+process.load('FWCore.MessageService.MessageLogger_cfi')
+process.load('Configuration.StandardSequences.GeometryRecoDB_cff')
+process.load('Configuration.StandardSequences.MagneticField_AutoFromDBCurrent_cff')
+process.load('Configuration.StandardSequences.EndOfProcess_cff')
+process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff')
+
+process.maxEvents = cms.untracked.PSet(
+    input = cms.untracked.int32(10000)
+)
+
+# Input source
+process.source = cms.Source("PoolSource",
+    fileNames = cms.untracked.vstring(
+        'file:/eos/user/s/sroychow/HZZ4l/Rereco/MuonTnp/ztnpisoAna/00F55CC9-B694-E711-A550-0CC47A7C3420.root',
+        'file:/eos/user/s/sroychow/HZZ4l/Rereco/MuonTnp/ztnpisoAna/00F9D855-E293-E711-B625-02163E014200.root',
+        'file:/eos/user/s/sroychow/HZZ4l/Rereco/MuonTnp/ztnpisoAna/06ED1148-1794-E711-9388-02163E013722.root',
+        'file:/eos/user/s/sroychow/HZZ4l/Rereco/MuonTnp/ztnpisoAna/0AC33351-A394-E711-A3CF-0CC47AD9908C.root',
+        'file:/eos/user/s/sroychow/HZZ4l/Rereco/MuonTnp/ztnpisoAna/0C6E4056-9494-E711-BC5F-0CC47AD98C5E.root',
+        'file:/eos/user/s/sroychow/HZZ4l/Rereco/MuonTnp/ztnpisoAna/10FA79CF-AB94-E711-8A25-0CC47A7C35F8.root',
+        'file:/eos/user/s/sroychow/HZZ4l/Rereco/MuonTnp/ztnpisoAna/16535AEC-8B94-E711-B08C-008CFAE45264.root',
+        'file:/eos/user/s/sroychow/HZZ4l/Rereco/MuonTnp/ztnpisoAna/1AAA5A56-9494-E711-B79C-0CC47AA98F92.root',
+        'file:/eos/user/s/sroychow/HZZ4l/Rereco/MuonTnp/ztnpisoAna/22F6175C-F495-E711-89BB-FA163EFA220C.root',
+        'file:/eos/user/s/sroychow/HZZ4l/Rereco/MuonTnp/ztnpisoAna/282D466D-B094-E711-BF51-0025905A608E.root'
+    )
+)
+from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
+process.GlobalTag.globaltag = '94X_mc2017_realistic_v10'
+
+# Primary Vertex Selector
+process.selectedPrimaryVertices = cms.EDFilter("VertexSelector",
+  src = cms.InputTag('offlineSlimmedPrimaryVertices'),
+  cut = cms.string("!isFake && ndof > 4 && abs(z) <= 24 && abs(position.Rho) <= 2"),
+  filter = cms.bool(True)                                          
+)
+
+process.load("Analysis.DrellYann.CfiFile_cfi")
+
+process.TFileService = cms.Service("TFileService",
+                                       fileName = cms.string('hists.root')
+                                   )
+
+process.p = cms.Path(process.selectedPrimaryVertices*process.demo)
